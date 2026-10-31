@@ -1,0 +1,23 @@
+[package]
+name = "proximity-voice-engine"
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-3.0-only AND BSD-3-Clause"
+description = "Proximity Voice's engine: a Plasmo Voice 2.x voice chat client (protocol, Opus, audio devices) without the game"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+# Audio devices: the same cpal Horizon plays its sounds with.
+cpal = "0.16"
+# The random IVs of the voice packets' AES/CBC.
+getrandom = "0.2"
+# Add-ons' own icons, sent as base64 PNGs.
+png = "0.18"
+
+# The vendored Opus codec's own switches (src/opus): both stay off.
+[features]
+research = []
+profile = []

@@ -1,0 +1,229 @@
+[mod]
+id = "proximity_voice"
+version = "0.4.1"
+priority = 100
+
+# The Nightly it was made and tested on: the packet hook needs this commit's Game::handle_packet.
+[compatibility]
+horizon_revision = "fbd7288a1d0955ebd3a1c8450766eae610313e99"
+
+# runtime.rs becomes the module crate::game::proximity_voice.
+[[module]]
+id = "runtime"
+file = "crates/horizon-client/src/game.rs"
+name = "proximity_voice"
+source = "runtime.rs"
+
+# The marks over heads, beside the name tags they go on: crate::proximity_marks of
+# horizon-client-render.
+[[module]]
+id = "marks"
+file = "crates/horizon-client-render/src/lib.rs"
+name = "proximity_marks"
+source = "marks.rs"
+visibility = "pub"
+
+# The protocol, the UDP link, Opus and the audio devices: a crate of its own, which
+# horizon-client depends on.
+[[crate]]
+id = "engine"
+path = "engine"
+
+[[injection]]
+id = "packet"
+kind = "HEAD"
+target = "horizon_client::game::remote::Game<'_>::handle_packet"
+helper = "packet.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "packet", ty = "&horizon_protocol::packets::play::Clientbound", value = "&packet" },
+]
+
+[[injection]]
+id = "chat"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::remote::Game<'_>::send_chat"
+helper = "chat.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "message", ty = "&str", value = "message" },
+]
+
+[[injection]]
+id = "tags"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client_render::hud::HudBatch::name_tag"
+helper = "tags.rs"
+bindings = [
+  { name = "batch", ty = "&mut HudBatch", value = "&mut *self" },
+  { name = "atlas", ty = "&HudAtlas", value = "atlas" },
+  { name = "text", ty = "&crate::text::Text", value = "text" },
+  { name = "y", ty = "f32", value = "y" },
+  { name = "color", ty = "u32", value = "color" },
+  { name = "background", ty = "u32", value = "background" },
+]
+
+# The mod's settings screen, in the dialog screen's place.
+[[injection]]
+id = "screen_open"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_open"
+helper = "screen_open.rs"
+bindings = [
+]
+
+[[injection]]
+id = "screen_draw"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::draw_dialog"
+helper = "screen_draw.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "batch", ty = "&mut horizon_client::hud::HudBatch", value = "&mut *batch" },
+]
+
+[[injection]]
+id = "screen_click"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_click"
+helper = "screen_click.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "screen_scroll"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_scroll"
+helper = "screen_scroll.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "delta", ty = "f32", value = "delta" },
+]
+
+[[injection]]
+id = "screen_drag"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_drag"
+helper = "screen_drag.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "screen_release"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_release"
+helper = "screen_release.rs"
+bindings = [
+]
+
+[[injection]]
+id = "screen_key"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_key"
+helper = "screen_key.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "key", ty = "winit::keyboard::KeyCode", value = "key" },
+  { name = "text", ty = "Option<&str>", value = "text" },
+]
+
+[[injection]]
+id = "screen_type"
+kind = "HEAD"
+cancellable = true
+target = "horizon_client::game::dialogs::Game<'_>::dialog_type"
+helper = "screen_type.rs"
+bindings = [
+]
+
+[[injection]]
+id = "screen_forget"
+kind = "HEAD"
+target = "horizon_client::game::dialogs::Game<'_>::close_dialogs"
+helper = "screen_forget.rs"
+bindings = [
+]
+
+[[injection]]
+id = "tick"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_tick"
+helper = "tick.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+]
+
+[[injection]]
+id = "hud"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_hud"
+helper = "hud.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "batch", ty = "&mut horizon_client::hud::HudBatch", value = "&mut *batch" },
+  { name = "corners", ty = "&mut horizon_client::extras_hud::Corners", value = "&mut *corners" },
+]
+
+[[injection]]
+id = "key"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_key"
+helper = "key.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "key", ty = "&str", value = "key" },
+  { name = "pressed", ty = "bool", value = "pressed" },
+]
+
+[[injection]]
+id = "command"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_command"
+helper = "command.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "command", ty = "&str", value = "command" },
+  { name = "ran", ty = "&mut bool", value = "&mut *ran" },
+]
+
+[[injection]]
+id = "list"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_mods"
+helper = "list.rs"
+bindings = [
+  { name = "mods", ty = "&mut Vec<crate::game::native_hooks::NativeMod>", value = "&mut *mods" },
+]
+
+[[injection]]
+id = "settings"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings"
+helper = "settings.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "buttons", ty = "&mut Vec<String>", value = "&mut *buttons" },
+]
+
+[[injection]]
+id = "click"
+kind = "HEAD"
+target = "horizon_client::game::native_hooks::Game<'_>::native_settings_click"
+helper = "click.rs"
+bindings = [
+  { name = "game", ty = "&mut crate::game::Game<'_>", value = "&mut *self" },
+  { name = "mod_id", ty = "&str", value = "mod_id" },
+  { name = "button", ty = "usize", value = "button" },
+]
