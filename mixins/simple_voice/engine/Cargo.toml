@@ -1,0 +1,21 @@
+[package]
+name = "simple-voice-engine"
+version = "0.1.0"
+edition = "2024"
+license = "LGPL-3.0-only AND BSD-3-Clause"
+description = "Simple Voice's engine: a Simple Voice Chat 2.6 client (protocol, Opus, audio devices) without the game"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+# Audio devices: the same cpal Horizon plays its sounds with.
+cpal = "0.16"
+# The random IVs of the voice packets' AES/GCM.
+getrandom = "0.2"
+
+# The vendored Opus codec's own switches (src/opus): both stay off.
+[features]
+research = []
+profile = []
